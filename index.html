@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller Ultra</title>
+    <title>Majestic Controller Final</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -64,7 +64,7 @@
 </head>
 <body>
 
-    <h2>Majestic Control Ultra</h2>
+    <h2>Majestic Control</h2>
 
     <div class="macro-container">
         <button class="macro-btn status" onclick="sendCmd('status')">ℹ️ Статус</button>
@@ -95,29 +95,25 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        
+        tg.expand();
+
         const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-        const userId = 472332014;
+        const userId = 472332014; // Твой ID
 
         function sendCmd(command) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
-            // Проверяем, запущен ли пульт внутри WebApp-интерфейса или в обычном окне
-            if (tg.initData && tg.initData.length > 0) {
-                // Если открыт как WebApp кнопкой снизу - шлем через нативный метод (может закрыться, но сработает)
-                tg.sendData(command);
-            } else {
-                // Если открыт через ССЫЛКУ-КНОПКУ (основной рабочий режим) - шлем бесшумный запрос без закрытия окна!
-                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-                
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", url, true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.send(JSON.stringify({
+            // Прямой фоновый запрос к боту от твоего имени, окно гарантированно НЕ закроется
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     chat_id: userId,
-                    text: "/cmd_" + command
-                }));
-            }
+                    text: command // Шлем чистую команду ('w', 'feed' и т.д.)
+                })
+            }).catch(e => console.log(e));
         }
     </script>
 </body>
