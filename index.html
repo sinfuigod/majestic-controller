@@ -124,10 +124,23 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ИСПРАВЛЕНО: отправка через sendData от ТВОЕГО имени
+        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
+        const userId = 472332014;
+
+        // ИСПРАВЛЕНО: Теперь шлем через скрытый FETCH-запрос. Пульт больше НЕ закроется!
         function sendCmd(commandName) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            tg.sendData(commandName); 
+            
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: userId,
+                    text: commandName
+                })
+            }).catch(err => console.log("Ошибка отправки:", err));
         }
 
         const zone = document.getElementById('joyZone');
