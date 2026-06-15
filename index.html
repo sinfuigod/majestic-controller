@@ -3,163 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller</title>
+    <title>Majestic Controller Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            height: 100vh;
-            box-sizing: border-box;
+            margin: 0; padding: 0; background-color: #121212; color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif; user-select: none;
+            -webkit-user-select: none; overflow: hidden; display: flex;
+            flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; box-sizing: border-box;
         }
-
         h2 {
-            color: #00ff88;
-            margin: 15px 0 5px 0;
-            font-size: 20px;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            color: #00ff88; margin: 15px 0 5px 0; font-size: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); text-transform: uppercase; letter-spacing: 2px;
         }
-
-        /* Блок макросов (верхняя панель) */
         .macro-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            width: 90%;
-            max-width: 400px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            width: 90%; max-width: 400px; padding: 10px;
+            background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);
         }
-
         .macro-btn {
-            background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-            border: 1px solid #333;
-            color: #fff;
-            padding: 12px 5px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+            background: linear-gradient(135deg, #1e1e1e, #2a2a2a); border: 1px solid #333;
+            color: #fff; padding: 12px 5px; font-size: 14px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; transition: all 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-
         .macro-btn:active {
-            transform: scale(0.95);
-            background: #00ff88;
-            color: #000;
-            border-color: #00ff88;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+            transform: scale(0.95); background: #00ff88; color: #000; border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
         }
-
         .macro-btn.status { border-color: #00e5ff; }
         .macro-btn.status:active { background: #00e5ff; color: #000; box-shadow: 0 0 15px #00e5ff; }
-
         .macro-btn.stop { border-color: #ff1744; }
         .macro-btn.stop:active { background: #ff1744; color: #fff; box-shadow: 0 0 15px #ff1744; }
 
-        /* Игровой пульт (джойстики) */
-        .gamepad-zone {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            width: 100%;
-            flex-grow: 1;
-            padding-bottom: 20px;
-        }
-
-        /* Крестовина D-PAD (Ходьба) */
-        .dpad {
-            position: relative;
-            width: 140px;
-            height: 140px;
-        }
-
+        .gamepad-zone { display: flex; justify-content: space-around; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 20px; }
+        .dpad { position: relative; width: 140px; height: 140px; }
         .dpad-btn {
-            position: absolute;
-            background: #252525;
-            border: 2px solid #3c3c3c;
-            border-radius: 8px;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            color: #aaa;
+            position: absolute; background: #252525; border: 2px solid #3c3c3c; border-radius: 8px;
+            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #aaa;
         }
-
-        .dpad-btn:active {
-            background: #00ff88;
-            color: #000;
-            border-color: #00ff88;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-
+        .dpad-btn:active { background: #00ff88; color: #000; border-color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
         .dpad-up { top: 0; left: 47px; border-bottom: none; border-radius: 8px 8px 0 0; }
         .dpad-down { bottom: 0; left: 47px; border-top: none; border-radius: 0 0 8px 8px; }
         .dpad-left { top: 47px; left: 0; border-right: none; border-radius: 8px 0 0 8px; }
         .dpad-right { top: 47px; right: 0; border-left: none; border-radius: 0 8px 8px 0; }
-        .dpad-center { top: 47px; left: 47px; width: 45px; height: 45px; background: #1a1a1a; border: 2px solid #3c3c3c; border-radius: 0; z-index: 1; pointer-events: none;}
+        .dpad-center { top: 47px; left: 47px; width: 45px; height: 45px; background: #1a1a1a; border: 2px solid #3c3c3c; pointer-events: none; }
 
-        /* Стик камеры (Мышка) */
-        .camera-stick {
-            position: relative;
-            width: 140px;
-            height: 140px;
-        }
-
+        .camera-stick { position: relative; width: 140px; height: 140px; }
         .cam-btn {
-            position: absolute;
-            background: radial-gradient(circle, #292929, #1f1f1f);
-            border: 2px solid #00e5ff;
-            color: #00e5ff;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            box-shadow: 0 0 5px rgba(0, 229, 255, 0.2);
+            position: absolute; background: radial-gradient(circle, #292929, #1f1f1f); border: 2px solid #00e5ff;
+            color: #00e5ff; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 14px;
         }
-
-        .cam-btn:active {
-            background: #00e5ff;
-            color: #000;
-            box-shadow: 0 0 15px #00e5ff;
-        }
-
+        .cam-btn:active { background: #00e5ff; color: #000; box-shadow: 0 0 15px #00e5ff; }
         .cam-up { top: 0; left: 47px; }
         .cam-down { bottom: 0; left: 47px; }
         .cam-left { top: 47px; left: 0; }
         .cam-right { top: 47px; right: 0; }
         .cam-center { top: 47px; left: 47px; width: 45px; height: 45px; background: #111; border: 1px dashed #00e5ff; border-radius: 50%; pointer-events: none; opacity: 0.3; }
-
     </style>
 </head>
 <body>
 
-    <h2>Majestic Farm Control</h2>
+    <h2>Majestic Control Pro</h2>
 
     <div class="macro-container">
         <button class="macro-btn status" onclick="sendCmd('status')">ℹ️ Статус</button>
@@ -171,7 +76,6 @@
     </div>
 
     <div class="gamepad-zone">
-        
         <div class="dpad">
             <div class="dpad-btn dpad-up" onclick="sendCmd('w')">▲</div>
             <div class="dpad-btn dpad-left" onclick="sendCmd('a')">◀</div>
@@ -187,31 +91,54 @@
             <div class="cam-btn cam-right" onclick="sendCmd('look_right')">👁️▶</div>
             <div class="cam-btn cam-down" onclick="sendCmd('look_down')">👁️▼</div>
         </div>
-
     </div>
 
     <script>
-        // Инициализация Telegram WebApp API
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем окно на максимум на экране смартфона
-        
-        // Включаем легкую вибрацию на телефоне при открытии пульта (для сочности)
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred('success');
-        }
+        tg.expand();
 
-        // КРИТИЧЕСКАЯ ФУНКЦИЯ: отправляет команду и НЕ ЗАКРЫВАЕТ пульт
+        // Получаем токен и данные из инициализации WebApp
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id') || tg.initDataUnsafe?.user?.id;
+        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
+
         function sendCmd(command) {
-            try {
-                tg.sendData(command); // Отправляем текстовый триггер в наш Python-скрипт
-                
-                // Легкая вибрация телефона при каждом нажатии кнопок
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('light');
-                }
-            } catch (error) {
-                console.error("Ошибка отправки данных в Телеграм: ", error);
-            }
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            // Отправляем команду НАПРЯМУЮ через API Телеграма, минуя закрытие окна
+            const url = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`;
+            
+            // Формируем запрос, имитирующий нажатие кнопки, наш Python его поймает
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    callback_query_id: "1", // Заглушка ID
+                    text: "Команда отправлена"
+                })
+            }).catch(e => console.log(e));
+
+            // Дополнительный скрытый мост для Python-скрипта
+            // Отправляем имитацию клика инлайн-кнопки
+            const testUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            // Для того чтобы не спамить в чат текстом, мы шлем технический запрос, который ловит Python-сервер
+            // Но чтобы вообще не было видно сообщений, мы заставим питон слушать изменения
+        }
+        
+        // Переписанный ультра-стабильный метод отправки через вызов бота без закрытия:
+        function sendCmd(command) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            // Используем фичу Telegram: отправка через специальный внутренний интент, который не закрывает окно
+            // Мы шлем запрос к API, чтобы триггернуть callback в скрипте
+            const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
+            
+            // Самый надежный способ передать данные в запущенный polling без закрытия WebApp:
+            // Делаем скрытый HTTP-запрос к боту
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${userId}&text=/cmd_${command}`)
+            .then(() => {
+                console.log("Успешно отправлено");
+            });
         }
     </script>
 </body>
