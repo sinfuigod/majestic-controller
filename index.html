@@ -97,24 +97,23 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-        const userId = 472332014;
+       const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
+const userId = 472332014;
 
-        function sendCmd(command) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+function sendCmd(commandName) {
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 
-            // Фоновый HTTP-запрос к боту. Окно WebApp теперь НЕ закроется!
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    text: command
-                })
-            }).catch(e => console.log(e));
-        }
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: userId,
+            text: commandName
+        })
+    }).catch(err => console.log("Ошибка:", err));
+}
     </script>
 </body>
 </html>
