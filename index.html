@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller Final</title>
+    <title>Majestic Controller Web</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -42,11 +42,6 @@
             border-radius: 6px;
             cursor: pointer;
             box-shadow: 0 4px 0px #00bfa3;
-            transition: all 0.05s ease;
-        }
-        .action-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
         }
         .controls-container {
             display: flex;
@@ -67,10 +62,6 @@
             cursor: pointer;
             box-shadow: 0 3px 0px #00bfa3;
         }
-        .d-btn:active {
-            background-color: #00bfa3;
-            box-shadow: none;
-        }
         .d-up { width: 46px; height: 55px; top: 0; left: 52px; border-radius: 12px 12px 6px 6px; }
         .d-down { width: 46px; height: 55px; bottom: 0; left: 52px; border-radius: 6px 6px 12px 12px; }
         .d-left { width: 55px; height: 46px; top: 52px; left: 0; border-radius: 12px 6px 6px 12px; }
@@ -82,7 +73,6 @@
             background-color: #00a88f;
             border-radius: 50%;
             position: relative;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
         }
         .joystick-center {
             width: 70px;
@@ -92,7 +82,6 @@
             position: absolute;
             top: 40px;
             left: 40px;
-            box-shadow: 0 4px 0px #00bfa3;
         }
     </style>
 </head>
@@ -101,10 +90,10 @@
     <div class="button-grid">
         <button class="action-btn" onclick="sendCmd('feed')">🍔 Покормить</button>
         <button class="action-btn" onclick="sendCmd('wheel')">🎡 Крутить колесо</button>
-        <button class="action-btn" onclick="sendCmd('stats')">📊 Статистика 1 мин</button>
-        <button class="action-btn" onclick="sendCmd('stop_afk')">🛑 Остановить АФК</button>
-        <button class="action-btn" onclick="sendCmd('start_afk')">🚀 Включить АФК</button>
-        <button class="action-btn" onclick="sendCmd('status')">ℹ️ Проверить статус</button>
+        <button class="action-btn" onclick="sendCmd('stats')">📊 Статистика</button>
+        <button class="action-btn" onclick="sendCmd('stop_afk')">🛑 Стоп АФК</button>
+        <button class="action-btn" onclick="sendCmd('start_afk')">🚀 Старт АФК</button>
+        <button class="action-btn" onclick="sendCmd('status')">ℹ️ Статус</button>
     </div>
 
     <div class="controls-container">
@@ -124,27 +113,15 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-
-        // Автоматически берем ID пользователя, который открыл пульт
-        const userId = tg.initDataUnsafe?.user?.id || 472332014;
-
-        // Отправка через фоновый FETCH — пульт БОЛЬШЕ НЕ ЗАКРОЕТСЯ
+        // Отправка ИНЛАЙН-методом: сообщение идет ТВОЕГО лица, пульт НЕ закрывается!
         function sendCmd(commandName) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    text: commandName
-                })
-            }).catch(err => console.log("Ошибка отправки:", err));
+            // Магия Телеграма: шлет текст в текущий чат от имени юзера
+            tg.switchInlineQuery(commandName, ["users", "chats", "bots"]);
         }
 
+        // Логика джойстика камеры
         const zone = document.getElementById('joyZone');
         const stick = document.getElementById('joyStick');
         const maxDistance = 40;
@@ -156,8 +133,7 @@
             const rect = zone.getBoundingClientRect();
             startX = rect.left + rect.width / 2;
             startY = rect.top + rect.height / 2;
-            stick.style.transition = 'none';
-        }, { passive: false });
+        });
 
         zone.addEventListener('touchmove', (e) => {
             e.preventDefault();
@@ -175,7 +151,7 @@
             stick.style.transform = `translate(${posX}px, ${posY}px)`;
 
             let now = Date.now();
-            if (now - lastCommandTime > 250 && distance > 18) {
+            if (now - lastCommandTime > 300 && distance > 20) {
                 lastCommandTime = now;
                 if (Math.abs(posX) > Math.abs(posY)) {
                     if (posX > 0) sendCmd('look_right');
@@ -185,13 +161,12 @@
                     else sendCmd('look_up');
                 }
             }
-        }, { passive: false });
+        });
 
         zone.addEventListener('touchend', (e) => {
             e.preventDefault();
-            stick.style.transition = 'transform 0.15s ease-out';
             stick.style.transform = 'translate(0px, 0px)';
-        }, { passive: false });
+        });
     </script>
 </body>
 </html>
