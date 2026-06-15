@@ -12,6 +12,7 @@
             -webkit-user-select: none;
             margin: 0;
             padding: 0;
+            touch-action: none; /* Полностью блокируем системные свайпы телефона везде */
         }
         body {
             background-color: #3a3a3a;
@@ -29,6 +30,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             width: 100%;
+            touch-action: auto; /* Разрешаем обычные клики для кнопок */
         }
         .action-btn {
             background-color: #00f3c5;
@@ -78,27 +80,26 @@
         .d-left { width: 55px; height: 46px; top: 52px; left: 0; border-radius: 12px 6px 6px 12px; }
         .d-right { width: 55px; height: 46px; top: 52px; right: 0; border-radius: 6px 12px 12px 6px; }
         
-        /* Динамический джойстик камеры */
+        /* Зона джойстика камеры */
         .joystick-zone {
             width: 150px;
             height: 150px;
             background-color: #00a88f;
             border-radius: 50%;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
-            touch-action: none;
         }
+        /* Внутренний подвижный стик жестко по центру */
         .joystick-center {
             width: 70px;
             height: 70px;
             background-color: #00f3c5;
             border-radius: 50%;
             position: absolute;
+            top: 40px; /* (150px - 70px) / 2 */
+            left: 40px; /* (150px - 70px) / 2 */
             box-shadow: 0 4px 0px #00bfa3;
-            transition: background-color 0.1s;
+            transform: translate(0px, 0px);
         }
     </style>
 </head>
@@ -134,49 +135,50 @@
             tg.sendData(commandName);
         }
 
-        // Логика тач-джойстика для камеры
         const zone = document.getElementById('joyZone');
         const stick = document.getElementById('joyStick');
         
-        let maxDistance = 40; // Максимальное смещение стика от центра
-        let startX = 0, startY = 0;
+        const maxDistance = 40; // Ограничение выхода за границы (px)
+        let startX = 0;
+        let startY = 0;
         let lastCommandTime = 0;
 
+        // Обработка начала касания
         zone.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
+            e.preventDefault(); // Блокируем стандартное поведение браузера
             const rect = zone.getBoundingClientRect();
-            // Центр зоны джойстика
+            // Находим точные координаты центра большого круга на экране
             startX = rect.left + rect.width / 2;
             startY = rect.top + rect.height / 2;
             stick.style.transition = 'none';
-        });
+        }, { passive: false });
 
+        // Обработка движения пальца
         zone.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
             
+            // Считаем сдвиг относительно центра большого круга
             let posX = touch.clientX - startX;
             let posY = touch.clientY - startY;
             
-            // Считаем дистанцию от центра
-            let distance = Math.sqrt(posX*posX + posY*posY);
+            let distance = Math.sqrt(posX * posX + posY * posY);
             
-            // Если палец ушел слишком далеко, ограничиваем движение стика рамками круга
+            // Если палец вышел за пределы, удерживаем бегунок внутри
             if (distance > maxDistance) {
                 posX = (posX / distance) * maxDistance;
                 posY = (posY / distance) * maxDistance;
                 distance = maxDistance;
             }
             
-            // Визуально сдвигаем внутренний кружок под пальцем
+            // Сдвигаем стик через translate
             stick.style.transform = `translate(${posX}px, ${posY}px)`;
 
-            // Чтобы не спамить команды слишком часто, отправляем их раз в 250 миллисекунд
+            // Отправляем команды направления боту в ТГ (не чаще чем раз в 200 мс)
             let now = Date.now();
-            if (now - lastCommandTime > 250 && distance > 20) {
+            if (now - lastCommandTime > 200 && distance > 15) {
                 lastCommandTime = now;
                 
-                // Определяем куда направлен стик (вверх/вниз/влево/вправо)
                 if (Math.abs(posX) > Math.abs(posY)) {
                     if (posX > 0) sendCmd('look_right');
                     else sendCmd('look_left');
@@ -185,13 +187,14 @@
                     else sendCmd('look_up');
                 }
             }
-        });
+        }, { passive: false });
 
-        zone.addEventListener('touchend', () => {
-            // Когда отпускаем палец — стик плавно возвращается в самый центр
-            stick.style.transition = 'transform 0.2s ease-out';
+        // Возврат в центр при отпускании пальца
+        zone.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stick.style.transition = 'transform 0.15s ease-out';
             stick.style.transform = 'translate(0px, 0px)';
-        });
+        }, { passive: false });
     </script>
 </body>
 </html>
