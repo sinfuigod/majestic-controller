@@ -3,93 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller Original</title>
+    <title>Majestic Controller Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+        }
         body {
-            margin: 0; padding: 0; background-color: #121212; color: #ffffff;
-            font-family: 'Segoe UI', Roboto, sans-serif; user-select: none;
-            -webkit-user-select: none; overflow: hidden; display: flex;
-            flex-direction: column; align-items: center; justify-content: space-between;
-            height: 100vh; box-sizing: border-box;
+            background-color: #3a3a3a;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 15px;
+            overflow: hidden;
         }
-        h2 {
-            color: #00ff88; margin: 15px 0 5px 0; font-size: 20px;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); text-transform: uppercase; letter-spacing: 2px;
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
         }
-        .macro-container {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            width: 90%; max-width: 400px; padding: 10px;
-            background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);
+        .action-btn {
+            background-color: #00f3c5;
+            color: #3a3a3a;
+            border: none;
+            padding: 16px 8px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #00bfa3;
+            transition: all 0.05s ease;
         }
-        .macro-btn {
-            background: linear-gradient(135deg, #1e1e1e, #2a2a2a); border: 1px solid #333;
-            color: #fff; padding: 12px 5px; font-size: 14px; font-weight: bold;
-            border-radius: 8px; cursor: pointer; transition: all 0.1s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 5px;
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
         }
-        .macro-btn:active {
-            transform: scale(0.95); background: #00ff88; color: #000; border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 35px;
+            padding: 0 10px;
         }
-        .macro-btn.status { border-color: #00e5ff; }
-        .macro-btn.status:active { background: #00e5ff; color: #000; box-shadow: 0 0 15px #00e5ff; }
-        .macro-btn.stop { border-color: #ff1744; }
-        .macro-btn.stop:active { background: #ff1744; color: #fff; box-shadow: 0 0 15px #ff1744; }
-
-        .gamepad-zone { display: flex; justify-content: space-around; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 20px; }
-        .dpad { position: relative; width: 140px; height: 140px; }
-        .dpad-btn {
-            position: absolute; background: #252525; border: 2px solid #3c3c3c; border-radius: 8px;
-            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #aaa;
+        .d-pad {
+            position: relative;
+            width: 150px;
+            height: 150px;
         }
-        .dpad-btn:active { background: #00ff88; color: #000; border-color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
-        .dpad-up { top: 0; left: 47px; border-bottom: none; border-radius: 8px 8px 0 0; }
-        .dpad-down { bottom: 0; left: 47px; border-top: none; border-radius: 0 0 8px 8px; }
-        .dpad-left { top: 47px; left: 0; border-right: none; border-radius: 8px 0 0 8px; }
-        .dpad-right { top: 47px; right: 0; border-left: none; border-radius: 0 8px 8px 0; }
-        .dpad-center { top: 47px; left: 47px; width: 45px; height: 45px; background: #1a1a1a; border: 2px solid #3c3c3c; pointer-events: none; }
-
-        .camera-stick { position: relative; width: 140px; height: 140px; }
-        .cam-btn {
-            position: absolute; background: radial-gradient(circle, #292929, #1f1f1f); border: 2px solid #00e5ff;
-            color: #00e5ff; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 14px;
+        .d-btn {
+            position: absolute;
+            background-color: #00f3c5;
+            cursor: pointer;
+            box-shadow: 0 3px 0px #00bfa3;
         }
-        .cam-btn:active { background: #00e5ff; color: #000; box-shadow: 0 0 15px #00e5ff; }
-        .cam-up { top: 0; left: 47px; }
-        .cam-down { bottom: 0; left: 47px; }
-        .cam-left { top: 47px; left: 0; }
-        .cam-right { top: 47px; right: 0; }
-        .cam-center { top: 47px; left: 47px; width: 45px; height: 45px; background: #111; border: 1px dashed #00e5ff; border-radius: 50%; pointer-events: none; opacity: 0.3; }
+        .d-btn:active {
+            background-color: #00bfa3;
+            box-shadow: none;
+        }
+        .d-up { width: 46px; height: 55px; top: 0; left: 52px; border-radius: 12px 12px 6px 6px; }
+        .d-down { width: 46px; height: 55px; bottom: 0; left: 52px; border-radius: 6px 6px 12px 12px; }
+        .d-left { width: 55px; height: 46px; top: 52px; left: 0; border-radius: 12px 6px 6px 12px; }
+        .d-right { width: 55px; height: 46px; top: 52px; right: 0; border-radius: 6px 12px 12px 6px; }
+         
+        .joystick-zone {
+            width: 150px;
+            height: 150px;
+            background-color: #00a88f;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .joystick-center {
+            width: 70px;
+            height: 70px;
+            background-color: #00f3c5;
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            box-shadow: 0 4px 0px #00bfa3;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Majestic Control</h2>
-
-    <div class="macro-container">
-        <button class="macro-btn status" onclick="sendCmd('status')">ℹ️ Статус</button>
-        <button class="macro-btn" onclick="sendCmd('feed')">🍔 Покормить</button>
-        <button class="macro-btn" onclick="sendCmd('wheel')">🎡 Колесо</button>
-        <button class="macro-btn" onclick="sendCmd('stats')">📊 Стата 1 мин</button>
-        <button class="macro-btn" style="border-color:#00ff88;" onclick="sendCmd('start_afk')">🚀 Включить АФК</button>
-        <button class="macro-btn stop" onclick="sendCmd('stop_afk')">🛑 Стоп АФК</button>
+    <div class="button-grid">
+        <button class="action-btn" onclick="sendCmd('feed')">🍔 Покормить</button>
+        <button class="action-btn" onclick="sendCmd('wheel')">🎡 Крутить колесо</button>
+        <button class="action-btn" onclick="sendCmd('stats')">📊 Статистика 1 мин</button>
+        <button class="action-btn" onclick="sendCmd('stop_afk')">🛑 Остановить АФК</button>
+        <button class="action-btn" onclick="sendCmd('start_afk')">🚀 Включить АФК</button>
+        <button class="action-btn" onclick="sendCmd('status')">ℹ️ Проверить статус</button>
     </div>
 
-    <div class="gamepad-zone">
-        <div class="dpad">
-            <div class="dpad-btn dpad-up" onclick="sendCmd('w')">▲</div>
-            <div class="dpad-btn dpad-left" onclick="sendCmd('a')">◀</div>
-            <div class="dpad-btn dpad-center"></div>
-            <div class="dpad-btn dpad-right" onclick="sendCmd('d')">▶</div>
-            <div class="dpad-btn dpad-down" onclick="sendCmd('s')">▼</div>
+    <div class="controls-container">
+        <div class="d-pad">
+            <div class="d-btn d-up" onclick="sendCmd('w')"></div>
+            <div class="d-btn d-left" onclick="sendCmd('a')"></div>
+            <div class="d-btn d-right" onclick="sendCmd('d')"></div>
+            <div class="d-btn d-down" onclick="sendCmd('s')"></div>
         </div>
 
-        <div class="camera-stick">
-            <div class="cam-btn cam-up" onclick="sendCmd('look_up')">👁️▲</div>
-            <div class="cam-btn cam-left" onclick="sendCmd('look_left')">👁️◀</div>
-            <div class="cam-btn cam-center"></div>
-            <div class="cam-btn cam-right" onclick="sendCmd('look_right')">👁️▶</div>
-            <div class="cam-btn cam-down" onclick="sendCmd('look_down')">👁️▼</div>
+        <div class="joystick-zone" id="joyZone">
+            <div class="joystick-center" id="joyStick"></div>
         </div>
     </div>
 
@@ -97,23 +124,59 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-       const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-const userId = 472332014;
+        // ИСПРАВЛЕНО: отправка через sendData от ТВОЕГО имени
+        function sendCmd(commandName) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            tg.sendData(commandName); 
+        }
 
-function sendCmd(commandName) {
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        const zone = document.getElementById('joyZone');
+        const stick = document.getElementById('joyStick');
+        const maxDistance = 40;
+        let startX = 0; let startY = 0;
+        let lastCommandTime = 0;
 
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: userId,
-            text: commandName
-        })
-    }).catch(err => console.log("Ошибка:", err));
-}
+        zone.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            const rect = zone.getBoundingClientRect();
+            startX = rect.left + rect.width / 2;
+            startY = rect.top + rect.height / 2;
+            stick.style.transition = 'none';
+        }, { passive: false });
+
+        zone.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            let posX = touch.clientX - startX;
+            let posY = touch.clientY - startY;
+            let distance = Math.sqrt(posX * posX + posY * posY);
+             
+            if (distance > maxDistance) {
+                posX = (posX / distance) * maxDistance;
+                posY = (posY / distance) * maxDistance;
+                distance = maxDistance;
+            }
+             
+            stick.style.transform = `translate(${posX}px, ${posY}px)`;
+
+            let now = Date.now();
+            if (now - lastCommandTime > 250 && distance > 18) {
+                lastCommandTime = now;
+                if (Math.abs(posX) > Math.abs(posY)) {
+                    if (posX > 0) sendCmd('look_right');
+                    else sendCmd('look_left');
+                } else {
+                    if (posY > 0) sendCmd('look_down');
+                    else sendCmd('look_up');
+                }
+            }
+        }, { passive: false });
+
+        zone.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stick.style.transition = 'transform 0.15s ease-out';
+            stick.style.transform = 'translate(0px, 0px)';
+        }, { passive: false });
     </script>
 </body>
 </html>
