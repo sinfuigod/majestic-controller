@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller Final</title>
+    <title>Majestic Controller</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -97,23 +97,11 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-        const userId = 472332014; // Твой ID
-
         function sendCmd(command) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-            // Прямой фоновый запрос к боту от твоего имени, окно гарантированно НЕ закроется
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    text: command // Шлем чистую команду ('w', 'feed' и т.д.)
-                })
-            }).catch(e => console.log(e));
+            // Родной метод отправки данных в бота. Окно закроется ТОЛЬКО ЕСЛИ это обычная кнопка.
+            // Но мы настроили Python-скрипт так, что пульт будет перезапускаться мгновенно.
+            tg.sendData(command);
         }
     </script>
 </body>
