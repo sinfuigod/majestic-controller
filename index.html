@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic TG Controller</title>
+    <title>Majestic TG Fixed Controller</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; touch-action: none; }
@@ -52,8 +52,15 @@
         function sendCmd(commandName) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             
-            // Отправляем команду НАПРЯМУЮ в текущий чат от имени пользователя
+            // Отправляем строго от ТВОЕГО имени
             tg.sendData(commandName);
+            
+            // Хак, чтобы предотвратить закрытие WebApp окна в Telegram
+            window.addEventListener('blur', function() {
+                setTimeout(function() {
+                    window.focus();
+                }, 1);
+            }, { once: true });
         }
 
         // Логика джойстика камеры
