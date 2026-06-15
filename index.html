@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Majestic Controller Pro</title>
+    <title>Majestic Controller Ultra</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -64,7 +64,7 @@
 </head>
 <body>
 
-    <h2>Majestic Control Pro</h2>
+    <h2>Majestic Control Ultra</h2>
 
     <div class="macro-container">
         <button class="macro-btn status" onclick="sendCmd('status')">ℹ️ Статус</button>
@@ -95,50 +95,29 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // Получаем токен и данные из инициализации WebApp
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('user_id') || tg.initDataUnsafe?.user?.id;
-        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-
-        function sendCmd(command) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-            // Отправляем команду НАПРЯМУЮ через API Телеграма, минуя закрытие окна
-            const url = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`;
-            
-            // Формируем запрос, имитирующий нажатие кнопки, наш Python его поймает
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    callback_query_id: "1", // Заглушка ID
-                    text: "Команда отправлена"
-                })
-            }).catch(e => console.log(e));
-
-            // Дополнительный скрытый мост для Python-скрипта
-            // Отправляем имитацию клика инлайн-кнопки
-            const testUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            // Для того чтобы не спамить в чат текстом, мы шлем технический запрос, который ловит Python-сервер
-            // Но чтобы вообще не было видно сообщений, мы заставим питон слушать изменения
-        }
         
-        // Переписанный ультра-стабильный метод отправки через вызов бота без закрытия:
+        const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
+        const userId = 472332014;
+
         function sendCmd(command) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            // Используем фичу Telegram: отправка через специальный внутренний интент, который не закрывает окно
-            // Мы шлем запрос к API, чтобы триггернуть callback в скрипте
-            const botToken = "8567646857:AAE0xM1YQaaPePqkaKKXxJPPZwRATQcPMao";
-            
-            // Самый надежный способ передать данные в запущенный polling без закрытия WebApp:
-            // Делаем скрытый HTTP-запрос к боту
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${userId}&text=/cmd_${command}`)
-            .then(() => {
-                console.log("Успешно отправлено");
-            });
+
+            // Проверяем, запущен ли пульт внутри WebApp-интерфейса или в обычном окне
+            if (tg.initData && tg.initData.length > 0) {
+                // Если открыт как WebApp кнопкой снизу - шлем через нативный метод (может закрыться, но сработает)
+                tg.sendData(command);
+            } else {
+                // Если открыт через ССЫЛКУ-КНОПКУ (основной рабочий режим) - шлем бесшумный запрос без закрытия окна!
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify({
+                    chat_id: userId,
+                    text: "/cmd_" + command
+                }));
+            }
         }
     </script>
 </body>
